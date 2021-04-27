@@ -4,7 +4,10 @@ const https = require('https');
 const fs = require('fs');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
+
 const config = require('./config');
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 const httpsServerOptions = {
     'key': fs.readFileSync('./https/key.pem'),
@@ -52,14 +55,14 @@ const unifiedServer = function(req, res){
             'queryStringObj': queryStringObj,
             'method': method,
             'headers': headers,
-            'payload': buffer
+            'payload': helpers.JSONParserCatch(buffer)
         };
 
         //Setelah variable chosenHandler kita mengassign dengan menggunakan cb yang fungsinya dipanggil di cb dibawah.
-        chosenHandler(data, function(statusCode = Number, payload){
+        chosenHandler(data, function(statusCode, payload){
             typeof statusCode === 'number' ? statusCode : 200
             typeof payload === 'object' ? payload : {};
-
+            console.log(payload);
             const payloadStr = JSON.stringify(payload);
             //Melakukan set Header
             res.setHeader('Content-Type', 'application/json')
@@ -79,20 +82,10 @@ const httpsServer = https.createServer(httpsServerOptions,(req, res) => {
     unifiedServer(req, res)
 })
 
-//Assign Object untuk handler
-const handlers = {};
-
-handlers.ping = function(data, cb){
-    cb(200) 
-};
-
-handlers.notFound = function(data, cb){
-    cb(404);
-};
-
 //Asign Object untuk Router
 const router = {
-    'ping': handlers.ping
+    'ping': handlers.ping,
+    'user': handlers.user
 }
 
 
