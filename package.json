@@ -1,0 +1,15 @@
+{
+  "name": "node-js-master-class",
+  "version": "1.0.0",
+  "description": "A tutorial for building node JS pure without npm",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
