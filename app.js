@@ -5,7 +5,7 @@ const fs = require('fs');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 
-const config = require('./config');
+const config = require('./lib/config');
 const handlers = require('./lib/handlers');
 const helpers = require('./lib/helpers');
 
@@ -62,7 +62,6 @@ const unifiedServer = function(req, res){
         chosenHandler(data, function(statusCode, payload){
             typeof statusCode === 'number' ? statusCode : 200
             typeof payload === 'object' ? payload : {};
-            console.log(payload);
             const payloadStr = JSON.stringify(payload);
             //Melakukan set Header
             res.setHeader('Content-Type', 'application/json')
