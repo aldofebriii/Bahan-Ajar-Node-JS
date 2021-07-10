@@ -2,7 +2,6 @@
 const http =  require('http');
 const https = require('https');
 const fs = require('fs');
-const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 
 const config = require('./lib/config');
@@ -20,13 +19,15 @@ const unifiedServer = function(req, res){
     ke API Server kita
     */
     //Mirip seperti URL Class membentuk sebuah object baru
-    const parsedUrl = url.parse(req.url, true)
+    const baseUrl = 'http://'+req.headers.host+'/';
+    const parsedUrl = new URL(req.url, baseUrl);
+
     //Menghilangkan forward2 slash
-    const path = parsedUrl.pathname.replace(/^\/+|\/+$/g,'');
+    const path = parsedUrl.pathname.replace(/^\/+|\/+$/g,''); // Menghilangkan slash2 pada path;
 
     //Kita meassign object query dari req.url
-    const queryStringObj = parsedUrl.query;
-
+    const queryStringObj = Object.fromEntries(parsedUrl.searchParams.entries());
+    console.log(queryStringObj);
     //Assign Variable terhadap method dari request
     const method = req.method.toLowerCase();
 
@@ -66,8 +67,8 @@ const unifiedServer = function(req, res){
             //Melakukan set Header
             res.setHeader('Content-Type', 'application/json')
             res.writeHead(statusCode);
-            res.end(payloadStr)
-            console.log('Returning Response ' + statusCode)
+            res.end(payloadStr);
+            console.log('Returning Response ' + statusCode);
         });
     });
 }
