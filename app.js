@@ -85,7 +85,8 @@ const httpsServer = https.createServer(httpsServerOptions,(req, res) => {
 //Asign Object untuk Router
 const router = {
     'ping': handlers.ping,
-    'user': handlers.user
+    'user': handlers.user,
+    'tokens': handlers.tokens
 }
 
 
