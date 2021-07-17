@@ -27,7 +27,7 @@ const unifiedServer = function(req, res){
 
     //Kita meassign object query dari req.url
     const queryStringObj = Object.fromEntries(parsedUrl.searchParams.entries());
-    console.log(queryStringObj);
+    
     //Assign Variable terhadap method dari request
     const method = req.method.toLowerCase();
 
@@ -86,7 +86,8 @@ const httpsServer = https.createServer(httpsServerOptions,(req, res) => {
 const router = {
     'ping': handlers.ping,
     'user': handlers.user,
-    'tokens': handlers.tokens
+    'tokens': handlers.tokens,
+    'checks': handlers.checks
 }
 
 
