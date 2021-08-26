@@ -13,6 +13,14 @@ const httpsServerOptions = {
     'cert': fs.readFileSync('./https/cert.pem')
 };
 
+//Asign Object untuk Router
+const router = {
+    'ping': handlers.ping,
+    'user': handlers.user,
+    'tokens': handlers.tokens,
+    'checks': handlers.checks
+}
+
 //Menyatukan fungsi server
 const unifiedServer = function(req, res){
     /*Kita menggunakan metode depresiasi untuk melakukan parsing terhadap url yang masuk
@@ -81,15 +89,6 @@ const httpServer = http.createServer((req, res)=>{
 const httpsServer = https.createServer(httpsServerOptions,(req, res) => {
     unifiedServer(req, res)
 })
-
-//Asign Object untuk Router
-const router = {
-    'ping': handlers.ping,
-    'user': handlers.user,
-    'tokens': handlers.tokens,
-    'checks': handlers.checks
-}
-
 
 //Spin the http server
 httpServer.listen(config.httpPort, () => {
