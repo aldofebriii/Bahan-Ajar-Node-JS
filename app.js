@@ -60,11 +60,11 @@ const unifiedServer = function(req, res){
         const chosenHandler = !router[path] ? handlers.notFound : router[path]
         //Data yang akan digunakan untuk callback, memiliki path, queryStringObj, method, headers dan payload
         const data = {
-            'path': path,
-            'queryStringObj': queryStringObj,
-            'method': method,
-            'headers': headers,
-            'payload': helpers.JSONParserCatch(buffer)
+            path: path,
+            queryStringObj: queryStringObj,
+            method: method,
+            headers: headers,
+            payload: helpers.JSONParserCatch(buffer)
         };
 
         //Setelah variable chosenHandler kita mengassign dengan menggunakan cb yang fungsinya dipanggil di cb dibawah.
