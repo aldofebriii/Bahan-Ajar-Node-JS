@@ -7,6 +7,7 @@ app.init = function(){
     //Initialize Server
     server.init();
 
+    //Initialize Worker
     worker.init();
 };
 
