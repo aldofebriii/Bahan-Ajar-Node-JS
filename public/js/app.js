@@ -2,22 +2,94 @@ class App {
     constructor(sessionToken) {
         this.sessionToken = sessionToken;
         this.client = new Client(this.sessionToken);
-    }
-    async ping(){
+    };
+
+    //Set terhadap session
+    setSessionToken(token){
+        //Reassign the sessionToken properties
+        this.sessionToken = token;
         try {
-            const client = this.client
-            const data  = await client.request({
-                path: '/ping',
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            return data;
+            const tokenStr = JSON.stringify(token);
+            //Save token STR on 
+            localStorage.setItem('token', tokenStr);
+            //ChSet the class
+            this.setLoggedInClass(true);
         } catch(err){
-            console.log(err);
+            this.setLoggedInClass(false);
         };
     };
+
+    //Set terhadap DOM Class sehingga memliki class loggedIn
+    setLoggedInClass(set){
+        //Check the condition
+        const body = document.querySelector('body');
+        if(set){
+            body.classList.add('loggedIn');
+        } else {
+            body.classList.remove('loggedIn');
+        };
+    };
+
+    /* Get Session token meruapakan apabila applikasi dibuka maka dia akan mengecheck 
+    apakah masih ada session atau tidak */
+    static getSessionToken(){
+        const tokenString = localStorage.getItem('token');
+        if(typeof tokenString === 'string'){
+            try {
+                const token = JSON.parse(tokenString);
+                const app = new App(token);
+                app.setSessionToken(token);
+                return token;
+            } catch(err){
+                const app = new App(false);
+            };
+        } else {
+            return false;
+        }
+    };
+
+    //Loop condition it will stay extend the token if user still using the application
+    async renewToken(){
+        try { 
+        //Check if there's a token
+        const currentToken = typeof this.sessionToken === 'object' ? this.sessionToken : false;
+        if(currentToken){
+            //Create data payload
+            const dataPayload = {
+                id: currentToken.id,
+                extend: true
+            };
+
+            const token = await this.client.request({
+                path: '/api/tokens',
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: dataPayload
+            });
+            
+            this.setSessionToken(token);
+            return token;
+        };
+        } catch(err){
+            this.setSessionToken(false);
+            return new Error("Failed on : " + err.message);
+        };
+    };
+
+    tokenRenewalLoop(){
+        let self = this;
+        setInterval(async function(){
+            const renewStats = await self.renewToken();
+            if(renewStats instanceof Error || !renewStats){
+                console.log("Failed on Renew Token");
+            } else {
+                console.log("Success on Renewed Token");
+            };
+        }, 10000)
+    };
+
     //Untuk melakukan inputan terhadap form
     bindForms(){
         let self = this;
@@ -71,8 +143,23 @@ class App {
     //Form Proccessor on Success 
     formResponseProcessor(formId,requestPayload,responsePayload){
         var functionToCall = false;
-        if(formId == 'accountCreate'){
-          // @TODO Do something here now that the account has been created successfully
+        if(formId === 'accountCreate'){
+            // @TODO Do something here now that the account has been created successfully
+            window.alert("User is successfully Created..");
+            window.location.reload();
+        };
+
+        if(formId === 'sessionCreate'){
+            //Get the token that coming from the response payload
+            const token = responsePayload;
+            //Create the Instansce App
+            const app = new App(token.id);
+            //Set The Session Token
+            app.setSessionToken(token);
+            //Info
+            window.alert("User is successfully Logged In");
+            //Redirect
+            window.location = '/checks/all';
         };
     };
 };
@@ -101,22 +188,28 @@ class Client  {
                 }
             };
             const clientRes = await fetch(`${baseUri}${path}`, fetchOpt);
+            console.log(clientRes.status);
             if(clientRes.status !== 200 && clientRes.status !== 201){
                 const errData = await clientRes.json();
-                return new Error(errData.Error);
+                throw new Error(errData.Error);
             };
             const clientData = await clientRes.json();
             return clientData;
         } catch(err){
-            console.log(err);
+            console.log(err.message);
         };
     };
 };
 
 
 const _init = function(){
-    const app = new App(false);
-    app.bindForms();    
+    const token = App.getSessionToken();
+    const app = token ? new App(token) : new App(false);
+    console.log(app);
+    //Binding Form to Listener
+    app.bindForms();
+    //Renew Token
+    app.tokenRenewalLoop();
 };
 
 window.onload = function(){
