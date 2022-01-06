@@ -4,8 +4,9 @@
   "description": "A tutorial for building node JS pure without npm",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "node test",
+    "start": "NODE_DEBUG=server node index.js",
+    "doc": "node doc/app.js"
   },
   "author": "",
   "license": "ISC",
