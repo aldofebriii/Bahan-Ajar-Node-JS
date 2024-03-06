@@ -1,26 +1,34 @@
-//Perfomance Hook
-const {PerformanceObserver, performance} = require('perf_hooks');
+const asynch = require('async_hooks');
+const fs = require('fs');
 
-//Sebuah Observer
-const obs = new PerformanceObserver(function(items, observer){
-  console.log(items.getEntries());
-  observer.disconnect();
-});
+const targetExecutionContext = false;
 
-obs.observe({
-  entryTypes: ['measure'],
-  buffered: true
-});
-
-performance.mark('loop_start');
-for(let i = 0; i < 99999; i++){
-  if(i === 9998){
-    performance.mark('loop_near_end');
-  };
+const whatTimeIsIt = function(cb){
+  setInterval(() => {
+    fs.writeSync(1, "When the setIntervalRun, the execution context is " + asynch.executionAsyncId() + "\n");
+    cb();
+  }, 2000);
 };
 
-performance.mark('all_finish');
+const asyncHook = asynch.createHook({
+  init: function(asyncId, number, type, triggerId, resource){
+    fs.writeSync(1, "Hook Init" + asyncId + '\n')
+  },
+  before: function(asyncId){
+    fs.writeSync(1, "Hook Before " + asyncId + '\n');
+  },
+  after: function(asyncId){
+    fs.writeSync(1, "Hook After" + asyncId + '\n');
+  },
+  destroy: function(asyncId){
+    fs.writeSync(1, "Hook Destroy" + asyncId + '\n');
+  },
+  promiseResolve: function(asyncId){
+    fs.writeSync(1, "Hook Promise Resolver never get called on our function" + asyncId + '\n');
+  }
+});
 
-performance.measure('Awal Hingga loop_start', 'loop_start');
-performance.measure('loop_start hingga loop_near_end', 'loop_start', 'loop_near_end');
-performance.measure('Awal hingga finish', 'all_finish');
+whatTimeIsIt(function(){
+  fs.writeSync(1, "The time is " + Date.now() + '\n');
+});
+asyncHook.enable();
